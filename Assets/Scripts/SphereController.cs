@@ -21,10 +21,8 @@ public class SphereController : MonoBehaviour
     }
 
 
-    private void Start()
-    {
-        currentSphere = PickRandomSphere();
-    }
+    private void Start() => currentSphere = PickRandomSphere();
+    
     private IEnumerator SetSphere()
     {
         yield return new WaitForSeconds(1);
@@ -36,36 +34,27 @@ public class SphereController : MonoBehaviour
         if (Input.touchCount > 0)
         {
             touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Began)
-            {
-                dragStarted = true;
-                downPos = upPos = touch.position;
-            }
+            if (touch.phase != TouchPhase.Began) return;
+            dragStarted = true;
+            downPos = upPos = touch.position;
         }
-        if (dragStarted)
-        {
-            if (touch.phase == TouchPhase.Moved)
-            {
-                downPos = touch.position;
-            }
-            if (currentSphere)
-            {
-                currentSphere.rb.velocity = CalculateDirection() * 5;
-            }
-            if (touch.phase == TouchPhase.Ended)
-            {
-                //fýrlat
-                downPos = touch.position;
-                dragStarted = false;
-                if (!currentSphere) return;
-                currentSphere.rb.velocity = Vector3.zero;
-                currentSphere.ThrowSphere();
-                currentSphere = null;
-                StartCoroutine(SetSphere());
-            }
-        }
-    }
 
+        if (!dragStarted) return;
+        //Drag started
+        if (touch.phase == TouchPhase.Moved) downPos = touch.position;
+        
+        if (currentSphere) currentSphere.rb.velocity = CalculateDirection() * 5;
+
+        if (touch.phase != TouchPhase.Ended) return;
+        //Launched
+        downPos = touch.position;
+        dragStarted = false;
+        if (!currentSphere) return;
+        currentSphere.rb.velocity = Vector3.zero;
+        currentSphere.ThrowSphere();
+        currentSphere = null;
+        StartCoroutine(SetSphere());
+    }
 
     private Vector3 CalculateDirection()
     {
@@ -75,10 +64,5 @@ public class SphereController : MonoBehaviour
         return temp;
     }
 
-
-
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+    public void RestartGame() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 }
